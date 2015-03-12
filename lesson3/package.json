@@ -1,0 +1,23 @@
+{
+  "name": "sss",
+  "version": "1.0.0",
+  "description": "xx",
+  "main": "x",
+  "scripts": {
+    "test": "x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "x"
+  },
+  "keywords": [
+    "x"
+  ],
+  "author": "x",
+  "license": "x",
+  "dependencies": {
+    "cheerio": "^0.18.0",
+    "express": "^4.12.2",
+    "superagent": "^1.0.0"
+  }
+}
