@@ -1,2 +1,4 @@
-lesson1/node_modules
-lesson*/node_modules
+.DS_Store
+
+node_modules
+coverage
