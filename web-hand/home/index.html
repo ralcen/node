@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>这是抓取的页面</title>
+</head>
+<style>
+    ul{
+        border: 1px solid #00C1B3;
+        margin: 20px auto auto;
+    }
+    ul img{
+        vertical-align: middle;
+        width: 30px;
+        height: 30px;
+        border: 1px solid #00C1B3;
+        border-radius: 3px;
+    }
+</style>
+<body>
+<h1>这是抓取的页面</h1>
+<div id="msg">
+</div>
+<script src="js/jquery-1.7.2.min.js"></script>
+<script>
+var hosturl='https://cnodejs.org';
+    $.ajax({
+        url:'/msg',
+        type:'GET',
+        dataType:'json',
+        success:function(data){
+            for(var i= 0,len=data.length;i<len;i++){
+                $('#msg').append(
+                        '<ul>' +
+                        '<li><img src="'+data[i].imgurl+'"/><a href="'+hosturl+data[i].href+'">'+data[i].title+'</a></li>' +
+                        '<li>作者是'+data[i].author+'</li>' +
+                        '</ul>'
+                );
+            }
+
+        }
+    })
+</script>
+</body>
+</html>
