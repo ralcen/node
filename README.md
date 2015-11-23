@@ -4,3 +4,4 @@
 ## 启动方式当然是
 1. npm install
 2. npm start
+3. http://localhost:3000/users/adduser
