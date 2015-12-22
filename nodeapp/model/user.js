@@ -8,4 +8,4 @@ var userSchema = new Schema({
     username: String,
     age: Number
 });
-exports.user=mongoose.model('user', userSchema);
+exports.user = mongoose.model('user', userSchema);
