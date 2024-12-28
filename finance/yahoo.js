@@ -1,5 +1,6 @@
 /**
  * 使用 Yahoo Finance API 获取股票数据
+ * https://github.com/gadicc/node-yahoo-finance2/blob/devel/docs/modules/historical.md
  */
 
 const yahooFinance = require('yahoo-finance2').default;
@@ -19,7 +20,7 @@ async function getStockMonthlyPerformance(symbol, month, years = 10) {
     }
 
     // 转换沪深股票代码格式（如果需要）
-    const formattedSymbol = symbol;
+    const formattedSymbol = formatSymbol(symbol); ;
     
     // 计算日期范围
     const endDate = new Date();
@@ -34,7 +35,7 @@ async function getStockMonthlyPerformance(symbol, month, years = 10) {
       period2: endDate.toISOString().split('T')[0],
       interval: '1d'
     });
-    console.log('数据获取成功:', historical);
+    // console.log('数据获取成功:', historical);
     
 
     // 过滤指定月份的数据
@@ -62,7 +63,11 @@ async function getStockMonthlyPerformance(symbol, month, years = 10) {
     const results = Object.entries(monthlyPerformance)
       .map(([year, data]) => {
         const startPrice = data.firstDay.close;
+        const startVolume = data.firstDay.volume/10000;
+        console.log('xd-data', data);
+        
         const endPrice = data.lastDay.close;
+        const endVolume = data.lastDay.volume/10000;
         const change = endPrice - startPrice;
         const changePercent = (change / startPrice) * 100;
         
@@ -75,11 +80,13 @@ async function getStockMonthlyPerformance(symbol, month, years = 10) {
           年份: parseInt(year),
           起始日期: formatDate(data.firstDay.date),
           结束日期: formatDate(data.lastDay.date),
-          开盘价: startPrice.toFixed(2),
-          收盘价: endPrice.toFixed(2),
+          起始交易量: startVolume+ '万',
+          结束交易量: endVolume+ '万',
+          开盘价: startPrice.toFixed(4),
+          收盘价: endPrice.toFixed(4),
           最高价: highestPrice.toFixed(2),
           最低价: lowestPrice.toFixed(2),
-          涨跌额: change.toFixed(2),
+          // 涨跌额: change.toFixed(2),
           涨跌幅: changePercent.toFixed(2) + '%',
           交易天数: tradingDays
         };
@@ -113,6 +120,15 @@ async function getStockMonthlyPerformance(symbol, month, years = 10) {
 function formatDate(date) {
   return new Date(date).toISOString().split('T')[0];
 }
+  /**
+   * 格式化股票代码
+   */
+  function formatSymbol(symbol) {
+    if (/^\d{6}$/.test(symbol)) {
+      return symbol.startsWith('6') ? `${symbol}.SS` : `${symbol}.SZ`;
+    }
+    return symbol;
+  }
 
 /**
  * 计算统计信息
@@ -123,12 +139,12 @@ function calculateStats(results) {
   
   return {
     平均涨跌幅: (percentages.reduce((a, b) => a + b, 0) / percentages.length).toFixed(2) + '%',
-    平均涨跌额: (changes.reduce((a, b) => a + b, 0) / changes.length).toFixed(2),
+    // 平均涨跌额: (changes.reduce((a, b) => a + b, 0) / changes.length).toFixed(2),
     上涨年份: percentages.filter(p => p > 0).length,
     下跌年份: percentages.filter(p => p < 0).length,
     最大涨幅: Math.max(...percentages).toFixed(2) + '%',
     最大跌幅: Math.min(...percentages).toFixed(2) + '%',
-    平均交易天数: Math.round(results.reduce((sum, r) => sum + r.交易天数, 0) / results.length)
+    平均交易天数: Math.round(results.reduce((sum, r) => sum + r.交易天数, 0) / results.length),
   };
 }
 
@@ -156,9 +172,15 @@ async function main() {
   // 可以传入不同的股票代码和月份
   // 例如：'^NDX'（纳斯达克100）、'000906.SS'（中证800）
   const examples = [
-    { symbol: '^GSPC', month: 1, years: 10 },  // 中证800 1月表现
-    // { symbol: '^NDX', month: 12 }    // 纳斯达克100 12月表现
-    // { symbol: 'sh000001', month: 12 }    // 纳斯达克100 12月表现
+    // { symbol: '^GSPC', month: 1, years: 10 },  // 标普500 1月表现
+    // { symbol: '^NDX', month: 1 },    // 纳斯达克100 11月表现
+    // { symbol: '000905.SS', month: 12 }    // 中证500 -- 000906.SZ
+    // { symbol: '000906.SS', month: 12 }    // 中证800 -- 000906.SZ
+    // { symbol: '600519.SS', month: 12 }    // 茅台 -- 600519.SS
+    // { symbol: '159525.SZ', month: 12 }    // 中证红利 -- 159525.SZ
+    // { symbol: '000300.SS', month: 12 }    // 沪深300 -- 159525.SZ
+    // { symbol: '000001.SS', month: 2 }    // 上证指数 -- 000001.SS
+    { symbol: '^IXIC', month: 12 }    // 纳斯达克综合指数 -- IXIC
   ];
 
   for (const example of examples) {
@@ -173,7 +195,7 @@ main();
 // getStockMonthlyPerformance('000906', 1);
 
 // 获取纳斯达克100 12月份表现
-// getStockMonthlyPerformance('^NDX', 12);
+// getStockMonthlyPerformance('NDX', 12);
 
 // 指定年数（如获取近5年数据）
 // getStockMonthlyPerformance('000906', 1, 5);
